@@ -1,6 +1,6 @@
 <template>
-    <div>
-        <mt-header title="地址">
+    <div style="overflow-y: hidden;">
+        <mt-header :title="address.name">
             <router-link to="/" slot="left">
                 <mt-button class="icosd">
                     <img src="../../../static/images/headss.png" alt="">
@@ -8,7 +8,7 @@
             </router-link>
             <mt-button slot="right" class="dlzc"><a href="">登陆</a> | <a href="">注册</a> </mt-button>
         </mt-header>
-        <mt-swipe :auto="4000" class="foodentry">
+       <!-- <mt-swipe :auto="4000" class="foodentry">
             <mt-swipe-item>
                 <ul>
                     <li><a href=""><img src="./images/1.png" alt=""><span class="title">地方菜系</span></a></li>
@@ -37,16 +37,44 @@
                     <li><a href=""><img src="./images/20.png" alt=""><span class="title">签到领红包</span></a></li>
                 </ul>
             </mt-swipe-item>
-        </mt-swipe>
-      <shoplist></shoplist>
+        </mt-swipe>-->
+            <!--首页导航轮播图-->
+        <nav class="msite_nav">
+        <!-- swiper的容器div -->
+        <div class="swiper-container">
+            <!-- swiper的包裹层div -->
+            <div class="swiper-wrapper">
+                <!-- swiper的轮播div -->
+                <div class="swiper-slide" v-for="(pages,index) in categorysArr" :key="index">
+                    <a href="javascript:" class="link_to_food" v-for="(data,index) in pages" :key="index">
+                        <div class="food_container">
+                            <img :src="baseImageUrl+data.image_url">
+                            <!-- <img src="./images/20.png" alt=""> -->
+                        </div>
+                        <span>{{data.title}}</span>
+                    </a>
+                </div>
+            </div>
+            <!-- swiper轮播图圆点 -->
+            <div class="swiper-pagination"></div>
+        </div>
+        <!-- <img src="./images/msite_back.svg" alt="back" v-else> -->
+        </nav>
+        <shoplist></shoplist>
     </div>
 </template>
 <script>
-  import shoplist from '@/components/ShopList/ShopList.vue'
+import Swiper from 'swiper'
+// 同时引入swiper的css文件
+import 'swiper//dist/css/swiper.min.css'
+
+import shoplist from '@/components/ShopList/ShopList.vue'
+import {mapState} from 'vuex'
 export default {
     data () {
         return {
-            selected:'msite'
+            selected:'msite',
+            baseImageUrl: "https://fuss10.elemecdn.com"
         }
     },
     methods: {
@@ -54,9 +82,54 @@ export default {
             console.log(num)
         }
     },
-  components:{
-    shoplist
-  }
+    components:{
+        shoplist
+    },
+    computed: {
+        ...mapState(['address','categorys']),
+        //根据categorys 一维数组生成一个2维数组
+        categorysArr (){
+            const {categorys} = this
+            //准备空的二维数组
+            const arr = []
+            let minArr = []
+            if(!categorys){
+                return;
+            }
+            // 遍历categorys
+            categorys.forEach(data => {
+                if (minArr.length === 8){
+                    minArr = []
+                }
+                if(minArr.length ===0) {
+                    arr.push(minArr)  
+                }
+                minArr.push(data)
+            });
+            return arr
+        }
+    },
+    watch: {
+        categorys (value){
+            //界面更新立即创建 swiper 对象
+            this.$nextTick(() => {
+                // 一旦完成界面更新, 立即执行回调
+                new Swiper('.swiper-container', {
+                autoplay: true,
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true
+                }
+                })
+            })
+            
+        }
+    },
+    mounted() { 
+        //发送请求
+        this.$store.dispatch('getCategorys') 
+        this.$store.dispatch('getShops')
+    },
 }
 </script>
 <style lang="stylus" rel="stylesheet/stylus">
@@ -101,4 +174,41 @@ export default {
         width: .24rem
         width: 2.4vw
         background-color: #00a6ff
+.msite_nav
+    bottom-border-1px(#e4e4e4)
+    margin-top 2px
+    height 200px
+    background #fff
+    .swiper-container
+        width 100%
+        height 100%
+        .swiper-wrapper
+            width 100%
+            height 100%
+            .swiper-slide
+                display flex
+                justify-content center
+                align-items flex-start
+                flex-wrap wrap
+                .link_to_food
+                    width 25%
+                .food_container
+                    display block
+                    width 100%
+                    text-align center
+                    padding-bottom 10px
+                    font-size 0
+                    img
+                        display inline-block
+                        width 50px
+                        height 50px
+                span
+                    display block
+                    width 100%
+                    text-align center
+                    font-size 13px
+                    color #666
+            .swiper-pagination
+            >span.swiper-pagination-bullet-active
+                background #02a774
 </style>

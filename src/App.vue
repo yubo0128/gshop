@@ -9,19 +9,27 @@
 
 <script>
 import 'mint-ui/lib/style.min.css'
+import {mapActions} from "vuex"
 import FooterGuide from '@/components/FooterGuide/FooterGuide.vue'
 export default {
   name: 'App',
   components: {
     FooterGuide
+  },
+  mounted () {
+    // this.$store.dispatch('getAddress')
+    this.getAddress()
+  },
+  methods: {
+    ...mapActions(['getAddress'])
   }
 }
 </script>
 <style lang="stylus" rel="stylesheet/stylus">
 @import "common/stylus/font.styl";
   /** 整个应用组件的样式**/
-  #app
-    width 100%
-    height 100%
-    background #f5f5f5
+#app
+  width 100%
+  height 100%
+  background #f5f5f5
 </style>
